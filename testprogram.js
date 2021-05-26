@@ -74,144 +74,140 @@ function setupPage() {
 				parser = new DOMParser();
 				xmlDoc = parser.parseFromString(resultsText,"text/xml");
 				
-				var testNodes = xmlDoc.getElementsByTagName("test");
+				var testNodes = xmlDoc.getElementsByTagName('tests')[0].children				
 				if (testNodes) {
 					var resDivText = "";
 					for (var i = 0; i < testNodes.length; i++) {
-						var btnName = "btn" + (numTests+i+1);
-						var nameText = "Run Test " + (numTests+i+1) + " (" + testNodes[i].getElementsByTagName("name")[0].innerHTML + ")";
-						resDivText += 
-							"<button class=\"collapsible\" id=\"" + btnName + "\">" + nameText + "</button>" +
-							"<div class=\"content\">" +
-							"	<div style=\"height: 450px; width: 100%;\">" +
-							"		<div class=\"mergely-resizer\">" +
-							"			<div id=\"compare" + (numTests+i+1) + "\">" +
-							"			</div>" +
-							"		</div>" +
-							"	</div>" +
-							"</div>" +
-							"<br>";
-					}
+						var btnName = "btn" + (i+1);
+						if (testNodes[i].tagName == "test") {
+							numTests++;
+
+							var lhsText = testNodes[i].getElementsByTagName("generated")[0].childNodes[0].nodeValue;
+							lhsText = lhsText.substr(2, lhsText.length-2);
+
+							var rhsText = testNodes[i].getElementsByTagName("expected")[0].childNodes[0].nodeValue;
+							rhsText = rhsText.substr(2, rhsText.length-2);
+							
+							var simPercent = (round100th(similarity(rhsText, lhsText) * 100));
+							var nameText = "Run Test " + (i+1) + " (" + testNodes[i].getElementsByTagName("name")[0].innerHTML + ")" + " = " + simPercent + "%"
+							var retVal = parseInt(testNodes[i].getElementsByTagName("return")[0].innerHTML);
+							var genCount = parseInt(testNodes[i].getElementsByTagName("gencount")[0].innerHTML);
+							if ((retVal != 0 && retVal != -1) || genCount < 0) {
+								simPercent -= 10;
+								if (simPercent < 0) {
+									simPercent = 0;
+								}
+								nameText += " - 10% (Hung/Crashed) -> " + (round100th(simPercent)) + "%";
+							}
+							total += simPercent;
+							sumDivText += "<br>" + nameText;
+							var extraClass = "failed";
+							if (simPercent >= 100) {
+								extraClass = "passed"; //document.getElementById(btnName).classList.add("passed");
+							}
+							resDivText += 
+								"<button class=\"collapsible " + extraClass + "\" id=\"" + btnName + "\">" + nameText + "</button>" +
+								"<div class=\"content\">" +
+								"	<div style=\"height: 450px; width: 100%;\">" +
+								"		<div class=\"mergely-resizer\">" +
+								"			<div id=\"compare" + (i+1) + "\">" +
+								"			</div>" +
+								"		</div>" +
+								"	</div>" +
+								"</div>" +
+								"<br>";
+						} else if (testNodes[i].tagName == "minitest") {
+							numTests++;
+							var nameText = "Mini Test " + (i+1) + " (" + testNodes[i].getElementsByTagName("name")[0].innerHTML + ")";
+							var regex = testNodes[i].getElementsByTagName("regex")[0].childNodes[0].nodeValue;
+							regex=new RegExp(regex.trim());
+							var genText = testNodes[i].getElementsByTagName("generated")[0].childNodes[0].nodeValue;
+							
+							var regexMatched = genText.search(regex);
+							var matchedText = "FAIL";
+							var matchedScore = 0;
+							var borderStyle = "background-color: crimson";
+							var extraClass = "failed";
+							if (regexMatched >= 0) {
+								matchedText = "PASS";
+								matchedScore = 100;
+								borderStyle = "background-color: lightgreen";
+								extraClass = "passed";
+							}
+							total += matchedScore;
+							nameText = nameText + " -> " + matchedText + " = " + matchedScore + "%"
+							sumDivText += "<br>" + nameText;
+
+							resDivText += 
+								"<button class=\"collapsible " + extraClass + "\" id=\"" + btnName + "\" style=\"" + borderStyle + "\">" + nameText + 
+								"</button>" +
+								"<div class=\"content\">" +
+								"	<p>Search For:</p>" +
+								"	<pre class=\"borderfix\">" + testNodes[i].getElementsByTagName("friendlyregex")[0].childNodes[0].nodeValue + "</pre>" +
+								"	<p>Input:</p>" +
+								"	<pre class='borderfix'>" + testNodes[i].getElementsByTagName("input")[0].childNodes[0].nodeValue + "</pre>" +
+								"	<p>Your Output:</p>" +
+								"	<pre class='borderfix'>" + testNodes[i].getElementsByTagName("generated")[0].childNodes[0].nodeValue + "</pre>" +
+								"</div>" +
+								"<br>";						
+						} else if (testNodes[i].tagName == "sourcetest") {
+//alert(testNodes[i].getElementsByTagName("sourcefile")[0].childNodes[0].nodeValue)
+							numTests++;
+							var nameText = "Source Test " + (i+1) + " (" + testNodes[i].getElementsByTagName("name")[0].innerHTML + ")";
+							var regex = testNodes[i].getElementsByTagName("regex")[0].childNodes[0].nodeValue;
+							regex=new RegExp(regex.trim());
+							var genText = testNodes[i].getElementsByTagName("sourcefile")[0].childNodes[0].nodeValue;
+							
+							var regexMatched = genText.search(regex);
+							var matchedText = "FAIL";
+							var matchedScore = 0;
+							var borderStyle = "background-color: crimson";
+							var extraClass = "failed";
+							if (regexMatched >= 0) {
+								matchedText = "PASS";
+								matchedScore = 100;
+								borderStyle = "background-color: lightgreen";
+								extraClass = "passed";
+							}
+							total += matchedScore;
+							nameText = nameText + " -> " + matchedText + " = " + matchedScore + "%"
+							sumDivText += "<br>" + nameText;
+							resDivText += 
+								"<button class=\"collapsible " + extraClass + "\" id=\"" + btnName + "\" style=\"" + borderStyle + "\">" + nameText +
+								"</button>" +
+								"<div class=\"content\">" +
+								"	<p>Search For:</p>" +
+								"	<pre class=\"borderfix\">" + testNodes[i].getElementsByTagName("friendlyregex")[0].childNodes[0].nodeValue + "</pre>" +
+								"	<p>Source File:</p>" +
+								"	<pre class='borderfix'>" + testNodes[i].getElementsByTagName("sourcefile")[0].childNodes[0].nodeValue.replaceAll('<', '&lt;') + "</pre>" +
+								"</div>" +
+								"<br>";						
+						}
+					}	
 					document.getElementById('results').innerHTML = resDivText;
 					for (var i = 0; i < testNodes.length; i++) {
-						var compName = "#compare" + (numTests+1);
-						var btnName = "btn" + (numTests+1);
-						$(compName).mergely({
-							width: 'auto',
-							height: 'auto',
-							license: 'lgpl-separate-notice',
-							cmsettings: {
-								readOnly: false, 
-								lineWrapping: true,
-							}
-						});
+						if (testNodes[i].tagName == "test") {
+							var compName = "#compare" + (i+1);
+							var btnName = "btn" + (i+1);
+							$(compName).mergely({
+								width: 'auto',
+								height: 'auto',
+								license: 'lgpl-separate-notice',
+								cmsettings: {
+									readOnly: false, 
+									lineWrapping: true,
+								}
+							});
 
-						var lhsText = testNodes[i].getElementsByTagName("generated")[0].childNodes[0].nodeValue;
-						lhsText = lhsText.substr(2, lhsText.length-2);
-						$(compName).mergely('lhs', lhsText);
+							var lhsText = testNodes[i].getElementsByTagName("generated")[0].childNodes[0].nodeValue;
+							lhsText = lhsText.substr(2, lhsText.length-2);
+							$(compName).mergely('lhs', lhsText);
 
-						var rhsText = testNodes[i].getElementsByTagName("expected")[0].childNodes[0].nodeValue;
-						rhsText = rhsText.substr(2, rhsText.length-2);
-						$(compName).mergely('rhs', rhsText);
-						
-						var simPercent = (round100th(similarity(rhsText, lhsText) * 100));
-						total += simPercent;
-						numTests++;
-						var nameText = document.getElementById(btnName).innerHTML + " = " + simPercent + "%"
-						var retVal = parseInt(testNodes[i].getElementsByTagName("return")[0].innerHTML);
-						var genCount = parseInt(testNodes[i].getElementsByTagName("gencount")[0].innerHTML);
-						if ((retVal != 0 && retVal != -1) || genCount < 0) {
-							nameText += " - 10% (Hung/Crashed) -> " + (simPercent - 10) + "%";
-							total -= 10;
-						}
-						sumDivText += "<br>" + nameText;
-						document.getElementById(btnName).innerHTML = nameText;
-						if (simPercent >= 100) {
-							document.getElementById(btnName).classList.add("passed");
-						} else {
-							document.getElementById(btnName).classList.add("failed");
+							var rhsText = testNodes[i].getElementsByTagName("expected")[0].childNodes[0].nodeValue;
+							rhsText = rhsText.substr(2, rhsText.length-2);
+							$(compName).mergely('rhs', rhsText);
 						}
 					}
-				}
-										
-				var testNodes = xmlDoc.getElementsByTagName("minitest");
-				if (testNodes) {
-					var miniresDivText = "";
-					for (var i = 0; i < testNodes.length; i++) {
-						var btnName = "btn" + (numTests+1);
-						var nameText = "Mini Test " + (numTests+1) + " (" + testNodes[i].getElementsByTagName("name")[0].innerHTML + ")";
-						var regex = testNodes[i].getElementsByTagName("regex")[0].childNodes[0].nodeValue;
-						regex=new RegExp(regex.trim());
-						var genText = testNodes[i].getElementsByTagName("generated")[0].childNodes[0].nodeValue;
-						
-						var regexMatched = genText.search(regex);
-						var matchedText = "FAIL";
-						var matchedScore = 0;
-						var borderStyle = "background-color: crimson";
-						var extraClass = "failed";
-						if (regexMatched >= 0) {
-							matchedText = "PASS";
-							matchedScore = 100;
-							borderStyle = "background-color: lightgreen";
-							extraClass = "passed";
-						}
-						total += matchedScore;
-						numTests++;
-						nameText = nameText + " -> " + matchedText + " = " + matchedScore + "%"
-						sumDivText += "<br>" + nameText;
-
-						miniresDivText += 
-							"<button class=\"collapsible " + extraClass + "\" id=\"" + btnName + "\" style=\"" + borderStyle + "\">" + nameText + 
-							"</button>" +
-							"<div class=\"content\">" +
-							"	<p>Search For:</p>" +
-							"	<pre class=\"borderfix\">" + testNodes[i].getElementsByTagName("friendlyregex")[0].childNodes[0].nodeValue + "</pre>" +
-							"	<p>Input:</p>" +
-							"	<pre class='borderfix'>" + testNodes[i].getElementsByTagName("input")[0].childNodes[0].nodeValue + "</pre>" +
-							"	<p>Your Output:</p>" +
-							"	<pre class='borderfix'>" + testNodes[i].getElementsByTagName("generated")[0].childNodes[0].nodeValue + "</pre>" +
-							"</div>" +
-							"<br>";
-					}
-					document.getElementById('miniresults').innerHTML = miniresDivText;
-				}
-				var testNodes = xmlDoc.getElementsByTagName("sourcetest");
-				if (testNodes) {
-					var sourceresDivText = "";
-					for (var i = 0; i < testNodes.length; i++) {
-						var btnName = "btn" + (numTests+1);
-						var nameText = "Source Test " + (numTests+1) + " (" + testNodes[i].getElementsByTagName("name")[0].innerHTML + ")";
-						var regex = testNodes[i].getElementsByTagName("regex")[0].childNodes[0].nodeValue;
-						regex=new RegExp(regex.trim());
-						var genText = testNodes[i].getElementsByTagName("sourcefile")[0].childNodes[0].nodeValue;
-						
-						var regexMatched = genText.search(regex);
-						var matchedText = "FAIL";
-						var matchedScore = 0;
-						var borderStyle = "background-color: crimson";
-						var extraClass = "failed";
-						if (regexMatched >= 0) {
-							matchedText = "PASS";
-							matchedScore = 100;
-							borderStyle = "background-color: lightgreen";
-							extraClass = "passed";
-						}
-						total += matchedScore;
-						numTests++;
-						nameText = nameText + " -> " + matchedText + " = " + matchedScore + "%"
-						sumDivText += "<br>" + nameText;
-						sourceresDivText += 
-							"<button class=\"collapsible " + extraClass + "\" id=\"" + btnName + "\" style=\"" + borderStyle + "\">" + nameText +
-							"</button>" +
-							"<div class=\"content\">" +
-							"	<p>Search For:</p>" +
-							"	<pre class=\"borderfix\">" + testNodes[i].getElementsByTagName("friendlyregex")[0].childNodes[0].nodeValue + "</pre>" +
-							"	<p>Source File:</p>" +
-							"	<pre class='borderfix'>" + testNodes[i].getElementsByTagName("sourcefile")[0].childNodes[0].nodeValue + "</pre>" +
-							"</div>" +
-							"<br>";
-					}
-					document.getElementById('sourceresults').innerHTML = sourceresDivText;
 				}
 
 				setupBorderFix();
