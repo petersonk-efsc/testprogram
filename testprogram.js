@@ -11,11 +11,13 @@
  * Calculates the similarity (a number within 0 and 1) between two strings.
  */
 function similarity (s1, s2) {
-	var longer = s1;
-	var shorter = s2;
-	if (s1.length < s2.length) {
-		longer = s2;
-		shorter = s1;
+	var ns1 = s1.replaceAll('\r\n', '\n');
+	var ns2 = s2.replaceAll('\r\n', '\n');
+	var longer = ns1;
+	var shorter = ns2;
+	if (ns1.length < ns2.length) {
+		longer = ns2;
+		shorter = ns1;
 	}
 	var longerLength = longer.length;
 	if (longerLength === 0) {
