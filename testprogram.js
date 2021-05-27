@@ -121,6 +121,8 @@ function setupPage() {
 						} else if (testNodes[i].tagName == "minitest") {
 							numTests++;
 							var nameText = "Mini Test " + (i+1) + " (" + testNodes[i].getElementsByTagName("name")[0].innerHTML + ")";
+							var retVal = parseInt(testNodes[i].getElementsByTagName("return")[0].innerHTML);
+							var genCount = parseInt(testNodes[i].getElementsByTagName("gencount")[0].innerHTML);
 							var regex = testNodes[i].getElementsByTagName("regex")[0].childNodes[0].nodeValue;
 							regex=new RegExp(regex.trim());
 							var genText = testNodes[i].getElementsByTagName("generated")[0].childNodes[0].nodeValue;
@@ -128,18 +130,24 @@ function setupPage() {
 							var regexMatched = genText.search(regex);
 							var matchedText = "FAIL";
 							var matchedScore = 0;
-							var borderStyle = "background-color: crimson";
-							var extraClass = "failed";
 							if (regexMatched >= 0) {
 								matchedText = "PASS";
 								matchedScore = 100;
-								borderStyle = "background-color: lightgreen";
+							}
+							nameText = nameText + " -> " + matchedText + " = " + matchedScore + "%"
+							if ((retVal != 0 && retVal != -1) || genCount < 0) {
+								matchedScore -= 10;
+								if (matchedScore < 0) {
+									matchedScore = 0;
+								}
+								nameText += " - 10% (Hung/Crashed) -> " + (round100th(matchedScore)) + "%";
+							}
+							sumDivText += "<br>" + nameText;
+							total += matchedScore;
+							var extraClass = "failed";
+							if (matchedScore >= 100) {
 								extraClass = "passed";
 							}
-							total += matchedScore;
-							nameText = nameText + " -> " + matchedText + " = " + matchedScore + "%"
-							sumDivText += "<br>" + nameText;
-
 							resDivText += 
 								"<button class=\"collapsible " + extraClass + "\" id=\"" + btnName + "\" style=\"" + borderStyle + "\">" + nameText + 
 								"</button>" +
@@ -153,7 +161,6 @@ function setupPage() {
 								"</div>" +
 								"<br>";						
 						} else if (testNodes[i].tagName == "sourcetest") {
-//alert(testNodes[i].getElementsByTagName("sourcefile")[0].childNodes[0].nodeValue)
 							numTests++;
 							var nameText = "Source Test " + (i+1) + " (" + testNodes[i].getElementsByTagName("name")[0].innerHTML + ")";
 							var regex = testNodes[i].getElementsByTagName("regex")[0].childNodes[0].nodeValue;
