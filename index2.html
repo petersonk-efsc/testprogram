@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<!-- ********************************************************* -->
+		<!-- Mergely -->
+		<!-- Requires jQuery -->
+
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>		
+		
+		<!-- Requires CodeMirror -->
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.32.0/codemirror.min.js"></script>
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.32.0/addon/search/searchcursor.min.js"></script>
+		<link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.32.0/codemirror.min.css" />
+
+		<!-- Requires Mergely -->
+		<script type="text/javascript" src="lib/mergely.js"></script>
+		<link type="text/css" rel="stylesheet" href="lib/mergely.css" />
+
+		<link type="text/css" rel="stylesheet" href="testprogram.css" />
+		<script type="text/javascript" src="collapsible.js"></script>
+		<link type="text/css" rel="stylesheet" href="collapsible.css" />
+		<script type="text/javascript" src="testprogram2.js"></script>
+	</head>
+	<body style="width: 100%; margin: 0;" onload="setupPage()">
+		<div>
+			<h1>Test Program</h1>
+			<ul>
+				<li>Step 1 - Set up files for testing (do this once):
+					<ul>
+						<li>Step 1a: Place the files from the test.zip
+							<ul>
+								<li>C++ - in the same folder as your exe file</li>
+								<li>C# - in the same folder as your exe file</li>
+								<li>Java - in the same folder as your package folder</li>
+								<li>Python - in the same folder as your py file</li>
+							</ul>
+						</li>
+					</ul>
+				</li>
+				<li>Step 2 - Each time you want to try testing your program:
+					<ul>
+						<li>Step 2a: Run TestMyProgram.exe (or test_my_program.py which requires that Python is installed and in your Path)</li>
+						<li>Step 2b: Upload outputResults.xml: <input type="file" id="fileResults"  accept=".xml*"></li>
+						<li>Step 2c: Review differences below
+							<div id="summary">
+							</div>
+						</li>
+					</ul>
+				</li>
+				<li>Step 3 - Submit your completed assignment to Canvas</li>
+			</ul>				
+		</div>
+		<div id="results">
+		</div>
+		<br/><br/>
+	</body>
+</html>
