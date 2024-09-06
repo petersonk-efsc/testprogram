@@ -11,8 +11,8 @@
  * Calculates the similarity (a number within 0 and 1) between two strings.
  */
 function similarity (s1, s2) {
-	var ns1 = s1; //.replaceAll('\r\n', '\n');
-	var ns2 = s2; //.replaceAll('\r\n', '\n');
+	var ns1 = s1.replaceAll('\r\n', '\n');
+	var ns2 = s2.replaceAll('\r\n', '\n');
 	var longer = ns1;
 	var shorter = ns2;
 	if (ns1.length < ns2.length) {
@@ -57,14 +57,6 @@ function round100th(n) {
 	return Math.round(n * 100) / 100;
 }
 
-function cleanString(s, removeOpenNewLine) {
-	var cleaned = s.replaceAll('\r\n', '\n').replaceAll('\r', '\n'); //.replace(/[^\x00-\x7F]/g, '');
-	if (removeOpenNewLine && cleaned[0] == '\n') {
-		cleaned = cleaned.substr(1);
-	}
-	return cleaned;
-}
-
 /* https://forums.asp.net/t/2119943.aspx?convert+txt+file+to+javascript+array */
 function setupPage() {
 	var fileResults = document.getElementById('fileResults');
@@ -93,10 +85,10 @@ function setupPage() {
 							numTests++;
 
 							var lhsText = testNodes[i].getElementsByTagName("generated")[0].childNodes[0].nodeValue;
-							lhsText = cleanString(lhsText, true); //lhsText.substr(2, lhsText.length-2);
+							lhsText = lhsText.substr(2, lhsText.length-2);
 
 							var rhsText = testNodes[i].getElementsByTagName("expected")[0].childNodes[0].nodeValue;
-							rhsText = cleanString(rhsText, true); //rhsText.substr(2, rhsText.length-2);
+							rhsText = rhsText.substr(2, rhsText.length-2);
 							
 							var simPercent = (round100th(similarity(rhsText, lhsText) * 100));
 							var nameText = "Run Test " + (i+1) + " (" + testNodes[i].getElementsByTagName("name")[0].innerHTML + ")" + " = " + simPercent + "%"
@@ -217,11 +209,11 @@ function setupPage() {
 							});
 
 							var lhsText = testNodes[i].getElementsByTagName("generated")[0].childNodes[0].nodeValue;
-							lhsText = cleanString(lhsText, true); //lhsText.substr(2, lhsText.length-2);
+							lhsText = lhsText.substr(2, lhsText.length-2);
 							$(compName).mergely('lhs', lhsText);
 
 							var rhsText = testNodes[i].getElementsByTagName("expected")[0].childNodes[0].nodeValue;
-							rhsText = cleanString(rhsText, true); //rhsText.substr(2, rhsText.length-2);
+							rhsText = rhsText.substr(2, rhsText.length-2);
 							$(compName).mergely('rhs', rhsText);
 						}
 					}
